@@ -1,7 +1,7 @@
 import { compare } from 'bcryptjs';
 import { sign } from 'jsonwebtoken';
 import User from '@modules/users/infra/typeorm/entities/User';
-import authConfig from '@config/upload';
+import authConfig from '@config/auth';
 import AppError from '@shared/errors/AppError';
 import IUsersRepository from '@modules/users/repositories/IUsersRepository';
 import { injectable, inject } from 'tsyringe';
@@ -30,14 +30,12 @@ class AuthenticateUserService {
       throw new AppError('Incorrect e-mail/password combination', 401);
     }
 
-    //  user.password = senha do usuário no banco de dados(cryptografada)
-    // password recebido do request é a senha que foi utilizada para tentar login
-
     const passwordMatched = await compare(password, user.password);
 
     if (!passwordMatched) {
       throw new AppError('Incorrect e-mail/password combination', 401);
     }
+
     const token = sign({}, authConfig.jwt.secret, {
       subject: user.id,
       expiresIn: authConfig.jwt.expiresIn,
